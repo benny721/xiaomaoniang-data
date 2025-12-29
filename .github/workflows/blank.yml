@@ -1,0 +1,29 @@
+name: Fetch Gitee Repositories Data
+
+on:
+  schedule:
+    # 每天凌晨 2 点运行一次 (可根据你的喜好调整时间)
+    - cron: '0 2 * * *'
+
+jobs:
+  fetch-data:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 步骤 1: 获取最新的仓库列表数据
+      - name: Fetch repositories from Gitee
+        run: |
+          # 使用 curl 命令，带上你的 Token 访问 Gitee API
+          # 注意替换掉 YOUR_GITEE_USERNAME 和 YOUR_GITEE_TOKEN
+          curl -H "Authorization: token ${{ secrets.GITEE_TOKEN }}" \
+               -o data/repos.json \
+               https://gitee.com/api/v5/users/benny123111/repos
+
+      # 步骤 2: 提交更新后的数据文件到仓库
+      - name: Commit and push updated data
+        run: |
+          git config --global user.name 'benny721'
+          git config --global user.email '3142962084@qq.com'
+          git add data/repos.json
+          git commit -m "Update repositories data [skip ci]" || exit 0
+          git push origin main
